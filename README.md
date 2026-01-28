@@ -1,42 +1,55 @@
-# CAD Table Toolbox Plugin V4.0 - Installation Guide
+[README_LISP.md](https://github.com/user-attachments/files/24905523/README_LISP.md)
+# CAD Table Tools (LISP)
 
-## 1. 编译项目 (Build Project)
-由于这是一个 C# .NET 插件，您需要先将其编译为 DLL 文件。
+## 1. 简介 (Introduction)
+这是一个轻量级的 AutoCAD LISP 插件集合，旨在简化表格绘制和数据提取任务。它包含两个主要命令：一个用于快速生成标准网格表格，另一个用于将 CAD 中的文字内容按位置关系导出为 Excel 可读的 CSV 文件。
 
-1. **打开项目**: 使用 **Visual Studio 2019** 或更高版本打开 `CAD_Table_Toolbox.csproj` 文件。
-2. **修复引用 (References)**:
-   - 在 Visual Studio 的“解决方案资源管理器 (Solution Explorer)”中，展开 **References**。
-   - 如果看到 `AcCoreMgd`, `AcDbMgd`, `AcMgd` 有黄色感叹号，说明路径不对。
-   - 右键点击这些引用 -> **Remove (移除)**。
-   - 右键点击 **References** -> **Add Reference (添加引用)**。
-   - 点击 **Browse (浏览)**，找到您的 AutoCAD 安装目录 (例如 `C:\Program Files\Autodesk\AutoCAD 202X\`)。
-   - 选择以下三个文件并添加:
-     - `AcCoreMgd.dll`
-     - `AcDbMgd.dll`
-     - `AcMgd.dll`
-   - *注意: 还要确保 `Copy Local` 属性设置为 `False`。*
-3. **编译**: 点击菜单栏的 **Build (生成)** -> **Build Solution (生成解决方案)**。
-   - 编译成功后，DLL 文件会在项目目录的 `bin\Debug\` 或 `bin\Release\` 文件夹下，文件名为 `CAD_Table_Toolbox.dll`。
+**适用版本**: AutoCAD 2018 及以上版本 (兼容大多数支持 AutoLISP 的 CAD 软件)
 
-## 2. 加载到 AutoCAD (Load Plugin)
+## 2. 功能列表 (Features)
 
-1. 打开 AutoCAD。
-2. 在命令行输入 **`NETLOAD`** 并回车。
-3. 在弹出的文件选择窗口中，找到并选择刚才编译好的 `CAD_Table_Toolbox.dll` 文件。
-4. 点击“打开”。
+### 命令 1: `QT_DRAW` (快速绘制表格)
+*   **功能**: 根据用户输入的行数、列数、行高、列宽，自动绘制由直线组成的网格。
+*   **输入**:
+    *   行数 (Rows)
+    *   列数 (Columns)
+    *   行高 (Row Height)
+    *   列宽 (Column Width)
+    *   插入点 (Top-Left Insertion Point)
+*   **输出**: 绘制在当前图层上的 LINE 实体。
 
-## 3. 使用插件 (Usage)
+### 命令 2: `QT_EXPORT` (导出文字到 CSV)
+*   **功能**: 选择图纸中的文字 (TEXT 或 MTEXT)，程序会根据它们在图纸上的几何位置（从上到下，从左到右）自动排序，并保存为 CSV 表格文件。
+*   **输入**: 框选包含文字的区域。
+*   **输出**: 一个 `.csv` 文件，可以直接用 Excel 打开。
+*   **智能排序**: 程序会自动识别同一行的文字（允许微小的Y轴误差），确保导出的表格结构正确。
 
-加载成功后，在 AutoCAD 命令行输入以下命令即可启动工具箱：
+## 3. 安装与加载 (Installation)
+1.  下载 `TableTools.lsp` 文件到您的电脑。
+2.  打开 AutoCAD。
+3.  输入命令 `APPLOAD` 并回车。
+4.  在弹出的对话框中，找到并选择 `TableTools.lsp`。
+5.  点击“加载 (Load)”。
+    *   *(可选) 将其拖入“启动组 (Startup Suite)”以在每次启动 CAD 时自动加载。*
+6.  命令行提示 `>>> LISP Table Tools Loaded <<<` 即表示加载成功。
 
-- **命令**: `TableToolbox`
+## 4. 使用说明 (Usage)
 
-这将打开“表格工具箱 V4.0”的主界面。
+### 绘制表格
+1.  输入命令 `QT_DRAW`。
+2.  按提示输入行数、列数等参数（支持回车使用默认值）。
+3.  在屏幕上点击一点作为表格的左上角。
 
-## 4. 功能说明
+### 导出文字
+1.  输入命令 `QT_EXPORT`。
+2.  框选您想要导出的文字对象。
+3.  在弹出的保存对话框中，选择 CSV 文件的保存位置。
+4.  导出完成后，程序会尝试自动打开该文件。
 
-- **表格生成**: 设置行列数和图层，点击“生成表格”并在图中指定插入点。
-- **Excel 导入/链接**:
-  - **导入**: 将 Excel 数据一次性导入为 CAD 表格。
-  - **链接**: 导入并建立链接，后续可通过代码扩展实现双向更新。
-- **表格转换**: (需要根据实际图形调整算法) 选择线条和文字转换为 CAD 表格实体。
+## 5. 已知限制 (Limitations)
+*   **QT_EXPORT**: 仅支持单行文字 (TEXT) 和多行文字 (MTEXT)，不支持块属性或表格实体 (ACAD_TABLE)。
+*   **排序精度**: 默认使用文字高度的 50% 作为“行对齐容差”。如果表格行非常密集且文字未严格对齐，可能会导致行识别错误。
+
+## 6. 作者与许可 (Author & License)
+*   **Author**: CAD Pair Programmer
+*   **License**: MIT License
